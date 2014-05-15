@@ -1,0 +1,14 @@
+{% block content %}
+    <table border="1">
+        <tr>
+            <th>name</th>
+            <th>description</th>
+        </tr>
+        {% for r  in result.results %}
+        <tr>
+            <td><a href="/repository/{{ r.name }}">{{ r.name }}</a></td>
+            <td>{{ r.description }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

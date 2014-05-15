@@ -1,0 +1,30 @@
+{% block content %}
+    <h3>{{ repo_name }}</h3>
+  
+  <h4>tags</h4>
+    <table border="1">
+        <tr>
+            <th>tag</th>
+            <th>image</th>
+        </tr>
+        {% for k,v  in tags.iteritems() %}
+        <tr>
+            <td><a href="/image/{{ v }}">{{ k }}</a></td>
+            <td>{{ v }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h4>images</h4>
+    <table border="1">
+        <tr>
+            <th>id</th>
+        </tr>
+        {% for r  in images %}
+        <tr>
+            <td><a href="/image/{{ r.id }}">{{ r.id }}</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
