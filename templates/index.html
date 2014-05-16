@@ -8,13 +8,19 @@
             <thead>
                 <tr>
                     <th>name</th>
-                    <th>description</th>
+                    <th>tags</th>
+                    <th>description</th> 
                 </tr>
             </thead>
             <tbody>
-                {% for r  in result.results %}
+                {% for r  in results %}
                     <tr>
                         <td><a href="/repository/{{ r.name }}">{{ r.name }}</a></td>
+                        <td>
+                            {% for tag,img in r.tags.iteritems() %}
+                            <a href="/image/{{ img }}"><span class="label label-primary">{{ tag }}</span></a>
+                            {% endfor %}
+                        </td>
                         <td>{{ r.description }}</td>
                     </tr>
                 {% endfor %}

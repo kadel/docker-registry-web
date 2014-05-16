@@ -17,8 +17,13 @@ def index():
     """
     list all repositories
     """
-    result = registry.search()
-    return render_template('index.html', result=result)
+    res = registry.search()
+    results = res['results']
+
+    for r in results:
+        r['tags'] = registry.list_tags(r['name'])
+    
+    return render_template('index.html', results=results)
 
 
 @app.route('/repository/<path:repo>')
