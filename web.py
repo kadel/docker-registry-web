@@ -21,7 +21,7 @@ def index():
     results = res['results']
 
     for r in results:
-        r['tags'] = registry.list_tags(r['name'])
+        r['tags'] = registry.get_tags(r['name'])
     
     return render_template('index.html', results=results)
 
@@ -31,8 +31,8 @@ def repository(repo):
     """
     get all tags and images for repository
     """
-    tags = registry.list_tags(repo)
-    images = registry.list_images(repo)
+    tags = registry.get_tags(repo)
+    images = registry.get_images(repo)
 
     return render_template('repository.html',
             tags=tags,
@@ -44,7 +44,7 @@ def image(img):
     """
     get info about image
     """
-    img = registry.image_info(img)
+    img = registry.get_image_info(img)
     return render_template('image.html', img=img)
 
 

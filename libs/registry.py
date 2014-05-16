@@ -14,21 +14,21 @@ class Registry:
         res = self._do_get('search?q={0}'.format(query))
         return res
 
-    def list_tags(self, repo):
+    def get_tags(self, repo):
         """
         list all tags for repository
         """
         res = self._do_get('repositories/{0}/tags'.format(repo))
         return res
 
-    def list_images(self, repo):
+    def get_images(self, repo):
         """
         list all images for repository
         """
         res = self._do_get('repositories/{0}/images'.format(repo))
         return res
 
-    def image_info(self, img):
+    def get_image_info(self, img):
         """
         get json info about image
         """
