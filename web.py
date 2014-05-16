@@ -4,7 +4,7 @@ simple, ugly and really really STUPID web interface for browsing docker-registry
 
 from flask import Flask
 from flask import render_template
-from lib.registry import Registry
+from libs.registry import Registry
 
 app = Flask(__name__)
 app.config.from_pyfile('web.cfg')
