@@ -5,7 +5,6 @@ simple, ugly and really really STUPID web interface for browsing docker-registry
 from flask import Flask
 from flask import render_template
 from libs.registry import Registry
-import treelib
 
 app = Flask(__name__)
 app.config.from_pyfile('web.cfg')
