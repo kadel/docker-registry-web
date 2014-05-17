@@ -35,6 +35,13 @@ class Registry:
         res = self._do_get('images/{0}/json'.format(img))
         return res
 
+    def get_image_ancestry(self, img):
+        '''
+        get ancestors for image
+        '''
+        res = self._do_get('images/{0}/ancestry'.format(img))
+        return res
+
 
     def _do_get(self, path):
         req = requests.get('{0}/{1}'.format(self.url, path))
