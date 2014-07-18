@@ -5,7 +5,7 @@ guick, simple and STUPID wrapper around docker-registry api
 import requests
 import simplejson as json
 
-class Registry:
+class Registry(object):
 
     def __init__(self, url):
         self.url = url    
