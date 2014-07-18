@@ -5,9 +5,14 @@ simple, ugly and really really STUPID web interface for browsing docker-registry
 from flask import Flask
 from flask import render_template
 from libs.registry import Registry
+from os import environ
 
 app = Flask(__name__)
 app.config.from_pyfile('web.cfg')
+
+# set REGISTRY_URL from env if key exist
+if environ.get("REGISTRY_URL"):
+    app.config["REGISTRY_URL"] = environ.get("REGISTRY_URL")
 
 registry = Registry(app.config["REGISTRY_URL"])
 
@@ -52,10 +57,10 @@ def repository(repo):
         ancestry_list.append({'name': k[0:12], 'parent': v if not v else v[0:12]})
 
     return render_template('repository.html',
-            tags=tags,
-            images=images,
-            repo_name=repo,
-            ancestry_list=ancestry_list)
+                           tags=tags,
+                           images=images,
+                           repo_name=repo,
+                           ancestry_list=ancestry_list)
 
 @app.route('/image/<img>')
 def image(img):
