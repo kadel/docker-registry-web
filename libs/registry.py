@@ -4,11 +4,13 @@ guick, simple and STUPID wrapper around docker-registry api
 
 import requests
 import simplejson as json
+from urlparse import urljoin
 
 class Registry(object):
 
     def __init__(self, url):
-        self.url = url    
+        self._version = "v1"
+        self.url = urljoin(url, self._version) + "/"
 
     def search(self, query=''):
         res = self._do_get('search?q={0}'.format(query))
@@ -44,7 +46,8 @@ class Registry(object):
 
 
     def _do_get(self, path):
-        req = requests.get('{0}/{1}'.format(self.url, path))
+        url = urljoin(self.url, path)
+        req = requests.get(url)
         if req.status_code == 200:
             if req.headers['content-type'] == 'application/json':
                 return json.loads(req.text)
