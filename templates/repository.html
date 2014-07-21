@@ -3,6 +3,13 @@
 {% block content %}
     <h3>{{ repo_name }}</h3>
 
+    <div class="col-md-6">
+        pull this repository:
+        <input type="text" id="pull_cmd" class="form-control" style="cursor: pointer"  onClick="this.select();"  readonly value="docker pull {{ config.REGISTRY_PULL }}/{{ repo_name }}">
+    </div>
+
+    <div class="clearfix"></div>
+    <h4>ancestry graph<h4>
     <!-- tree graph -->
     <div id="graph"></div>
     <script> var data = {{ ancestry_list |tojson }}</script>

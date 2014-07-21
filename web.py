@@ -7,6 +7,7 @@ from flask import render_template
 from flask import redirect
 from libs.registry import Registry
 from os import environ
+from urlparse import urlparse
 
 app = Flask(__name__)
 app.config.from_pyfile('web.cfg')
@@ -14,6 +15,9 @@ app.config.from_pyfile('web.cfg')
 # set REGISTRY_URL from env if key exist
 if environ.get("REGISTRY_URL"):
     app.config["REGISTRY_URL"] = environ.get("REGISTRY_URL")
+
+# address for use in docker pull command
+app.config["REGISTRY_PULL"] =  urlparse(app.config["REGISTRY_URL"]).netloc
 
 registry = Registry(app.config["REGISTRY_URL"])
 
