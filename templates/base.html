@@ -7,9 +7,9 @@
 
     <title>Docker Registry Web</title>
 
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ config.BASE_URL }}static/css/bootstrap.min.css" rel="stylesheet">
 
-    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <link href="{{ config.BASE_URL }}static/css/dashboard.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Docker Registry Web</a>
+          <a class="navbar-brand" href="{{ config.BASE_URL }}">Docker Registry Web</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -46,7 +46,7 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li><a href="#">Repositories</a></li>
+            <li><a href="{{ config.BASE_URL }}repositories">Repositories</a></li>
           </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
@@ -57,9 +57,9 @@
       </div>
     </div>
 
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/bootstrap.min.js"></script>
-    <script src="/static/js/docs.min.js"></script>
+    <script src="{{ config.BASE_URL }}static/js/jquery.min.js"></script>
+    <script src="{{ config.BASE_URL }}static/js/bootstrap.min.js"></script>
+    <script src="{{ config.BASE_URL }}static/js/docs.min.js"></script>
   </body>
 </html>
 

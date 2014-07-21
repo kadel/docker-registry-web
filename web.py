@@ -4,6 +4,7 @@ simple, ugly and really really STUPID web interface for browsing docker-registry
 
 from flask import Flask
 from flask import render_template
+from flask import redirect
 from libs.registry import Registry
 from os import environ
 
@@ -17,8 +18,17 @@ if environ.get("REGISTRY_URL"):
 registry = Registry(app.config["REGISTRY_URL"])
 
 
+
 @app.route('/')
 def index():
+    """
+    homepage
+    """
+    return redirect('/repositories')
+
+
+@app.route('/repositories')
+def repositories():
     """
     list all repositories
     """
@@ -29,6 +39,7 @@ def index():
         r['tags'] = registry.get_tags(r['name'])
     
     return render_template('index.html', results=results)
+
 
 
 @app.route('/repository/<path:repo>')

@@ -6,9 +6,9 @@
   <!-- tree graph -->
   <div id="graph"></div>
   <script> var data = {{ ancestry_list |tojson }}</script>
-  <link href="/static/css/d3tree.css" rel="stylesheet">
+  <link href="{{ config.BASE_URL }}static/css/d3tree.css" rel="stylesheet">
   <script src="http://d3js.org/d3.v3.min.js"></script>
-  <script src="/static/js/d3tree.js"></script>
+  <script src="{{ config.BASE_URL }}static/js/d3tree.js"></script>
 
   <pre>
   {{ img_info | pprint }}

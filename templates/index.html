@@ -15,10 +15,10 @@
             <tbody>
                 {% for r  in results %}
                     <tr>
-                        <td><a href="/repository/{{ r.name }}">{{ r.name }}</a></td>
+                        <td><a href="{{ config.BASE_URL }}repository/{{ r.name }}">{{ r.name }}</a></td>
                         <td>
                             {% for tag,img in r.tags.iteritems() %}
-                            <a href="/image/{{ img }}"><span class="label label-primary">{{ tag }}</span></a>
+                            <a href="{{ config.BASE_URL }}image/{{ img }}"><span class="label label-primary">{{ tag }}</span></a>
                             {% endfor %}
                         </td>
                         <td>{{ r.description }}</td>
