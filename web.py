@@ -54,9 +54,11 @@ def repository(repo):
     tags = registry.get_tags(repo)
     images = registry.get_images(repo)
 
+    # swap key and value
+    inv_tag = {v:k for k, v in tags.iteritems()}
 
-    # create ancestry in dict {node,parent} for easy duplicate detection,
-    # then make list in as list in format for view (d3)
+    # create ancestry as dict {node,parent} for easy duplicate detection,
+    # then make list in format for view (d3)
     ancestry_map = {}
     ancestry_list = []
 
@@ -69,7 +71,14 @@ def repository(repo):
                 ancestry_map[a[i]] = a[i+1]
 
     for k,v in ancestry_map.iteritems():
-        ancestry_list.append({'name': k[0:12], 'parent': v if not v else v[0:12]})
+        name = k
+        # if image has tag, show tag instead of hash
+        if name in inv_tag:
+            name = inv_tag[name]
+        else:
+            # show only first 12 characters from hash
+            name = name[0:12]
+        ancestry_list.append({'name': name, 'parent': v if not v else v[0:12]})
 
     return render_template('repository.html',
                            tags=tags,
