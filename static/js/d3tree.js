@@ -27,7 +27,7 @@ data.forEach(function(node) {
 // ************** Generate the tree diagram	 *****************
 var margin = {top: 20, right: 10, bottom: 10, left: 20},
 	width = 600 - margin.right - margin.left,
-	height = 400 - margin.top - margin.bottom;
+	height = 600 - margin.top - margin.bottom;
 	
 var i = 0;
 
