@@ -8,6 +8,7 @@ from flask import redirect
 from libs.registry import Registry
 from os import environ
 from urlparse import urlparse
+import re
 
 app = Flask(__name__)
 app.config.from_pyfile('web.cfg')
@@ -39,10 +40,19 @@ def repositories():
     res = registry.search()
     results = res['results']
 
-    for r in results:
+    def sort_key(x):
+        library_ns = re.match('library\/(.*)', x['name'])
+        if library_ns:
+            # so library repositories will be first
+            return "-1/{}".format(library_ns.groups(1))
+        return x['name']
+            
+    results_sorted = sorted(results, key=sort_key) 
+
+    for r in results_sorted:
         r['tags'] = registry.get_tags(r['name'])
     
-    return render_template('index.html', results=results)
+    return render_template('index.html', results=results_sorted)
 
 
 
