@@ -36,18 +36,7 @@
         </table>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <h4>ancestry graph</h4>
-            <!-- tree graph -->
-            <div id="graph"></div>
-            {{ result }}
-            <script> var data = {{ result }}</script>
-            <link href="{{ config.BASE_URL }}static/css/d3tree.css" rel="stylesheet">
-            <script src="http://d3js.org/d3.v3.min.js"></script>
-            <script src="{{ config.BASE_URL }}static/js/d3tree.js"></script>
-        </div>
-    </div>
+
     {% else %}
         {% if not submited %}
         Press button to find descendants.
