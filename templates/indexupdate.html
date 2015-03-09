@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="page-header">Image repository index refresh</h1>
+
+<form action="" method="get" name="post">
+    <div class="row">
+        <div class="col-md-12">
+            <input type="submit" class="btn" name="doupdate" value="Refresh image repository index"/>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <!-- tree graph -->
+
+            {% if indexupdateresult %}
+            <b>Found {{ indexupdateresult.oldImages }} already existing,
+                {{ indexupdateresult.newImages }} new images, with {{
+                indexupdateresult.errors }} errors</b>
+            <br>
+            {% for logLine in indexupdateresult.results %}
+            <tr>
+                {{ logLine }}<br>
+            </tr>
+            {% endfor %}
+            {% else %}
+                <b>Press button to refresh image repository index. It will scan all repositories for new images</b>
+            {% endif %}
+
+        </div>
+    </div>
+
+</form>
+{% endblock %}

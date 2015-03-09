@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h1 class="page-header">Descendants</h1>
+
+    <div class="row">
+        <div class="col-md-12">
+            {% include 'descendantsSearch.html' %}
+        </div>
+    </div>
+
+    {% if result.descendants %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Layer</th>
+                <th>Tag</th>
+                <th>Id</th>
+                <th>Parent</th>
+                <th>Author</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for r in result.descendants %}
+            <tr>
+                <td><a href="/repository/{{ r.layer }}">{{ r.layer }}</a></td>
+                <td>{{ r.tag }}</td>
+                <td><a href="/image/{{ r.id }}">{{ r.shortId }}</a></td>
+                <td><a href="/image/{{ r.parent }}">{{ r.shortParent }}</a></td>
+                <td>{{ r.author }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h4>ancestry graph</h4>
+            <!-- tree graph -->
+            <div id="graph"></div>
+            {{ result }}
+            <script> var data = {{ result }}</script>
+            <link href="{{ config.BASE_URL }}static/css/d3tree.css" rel="stylesheet">
+            <script src="http://d3js.org/d3.v3.min.js"></script>
+            <script src="{{ config.BASE_URL }}static/js/d3tree.js"></script>
+        </div>
+    </div>
+    {% else %}
+        {% if not submited %}
+        Press button to find descendants.
+        {% else %}
+        No results found. Do you want to <a href="/indexupdate">refresh index</a>?
+        {% endif %}
+    {% endif %}
+
+
+{% endblock %}

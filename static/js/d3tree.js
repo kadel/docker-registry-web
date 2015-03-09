@@ -55,7 +55,7 @@ function update(source) {
 	  links = tree.links(nodes);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d) { d.y = d.depth * 80; });
+  nodes.forEach(function(d) { d.y = d.depth * 60; });
 
   // Declare the nodes…
   var node = svg.selectAll("g.node")
@@ -67,9 +67,14 @@ function update(source) {
 	  .attr("transform", function(d) { 
 		  return "translate(" + d.x + "," + d.y + ")"; });
 
+  var onclickFce = function(d) {return window.location=d.imageid};
+
   nodeEnter.append("circle")
 	  .attr("r", 10)
-	  .style("fill", "#fff");
+	  .style("fill", "#fff")
+	  .on("click", onclickFce);
+	  ;;
+
 
   nodeEnter.append("text")
 	  .attr("x", function(d) { 
@@ -77,8 +82,14 @@ function update(source) {
 	  .attr("dy", "22px")
 	  .attr("text-anchor", function(d) { 
 		  return "middle" })//|| d._children ? "end" : "start"; })
-	  .text(function(d) { return d.name; })
-	  .style("fill-opacity", 1);
+	  .text(function(d) {
+		   label= d.name 
+		   if (d.author != null) label += " (" + d.author + ") ";
+		   return label; })  //+ d.created;
+	  .style("fill-opacity", 1)
+	  .on("click", onclickFce);
+	  ;
+
 
   // Declare the links…
   var link = svg.selectAll("path.link")

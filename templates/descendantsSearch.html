@@ -1,0 +1,40 @@
+<form action="" method="post" name="post">
+    {{ form.hidden_tag() }}
+
+    {% if form.tag %}
+    <div class="row">
+        <div class="col-md-1">Layer</div>
+        <div class="col-md-2">
+            {{ form.layer }}
+        </div>
+        <div class="col-md-2">
+            <a href="/indexupdate">Refresh Index</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-1">Tag</div>
+        <div class="col-md-2">
+            {{ form.tag(length=64, maxlength=64) }}
+        </div>
+        <div class="col-md-2">
+            <input class="btn" type=submit name="bylayerandtag" value="Find by layer and tag"/>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if form.rawid %}
+    <div class="row">
+        <div class="col-md-1">Raw ID</div>
+        <div class="col-md-6">
+            {{ form.rawid(size=64, maxlength=64) }}
+        </div>
+        <div class="col-md-2">
+            <input class="btn" type=submit name="byrawid" value="Find by raw id"/>
+        </div>
+        <div class="col-md-2">
+            <a href="/indexupdate">Refresh Index</a>
+        </div>
+    </div>
+    {% endif %}
+
+</form>

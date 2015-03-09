@@ -3,6 +3,13 @@
 {% block content %}
   <h3>{{ img_info.id }}</h3>
 
+    <div class="row">
+        <div class="col-md-6">
+            Find descendants:
+            <a href="{{ config.BASE_URL }}descendants/byid/{{ img_info.id }}">descendants</a>
+        </div>
+    </div>
+
   <!-- tree graph -->
   <div id="graph"></div>
   <script> var data = {{ ancestry_list |tojson }}</script>
