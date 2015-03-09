@@ -2,12 +2,23 @@
 simple, ugly and really really STUPID web interface for browsing docker-registry
 """
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from libs.model import Base
+from libs.model import Image
+
 from flask import Flask
 from flask import render_template
 from flask import redirect
+from flask import request
+
 from libs.registry import Registry
 from os import environ
 from urlparse import urlparse
+from libs.forms import DescendantsSearchByTagForm
+from libs.forms import DescendantsSearchByIdForm
+from libs.ImageDescendants import ImageDescendants
+
 import re
 
 app = Flask(__name__)
@@ -23,6 +34,12 @@ app.config["REGISTRY_PULL"] =  urlparse(app.config["REGISTRY_URL"]).netloc
 registry = Registry(app.config["REGISTRY_URL"])
 
 
+engine = create_engine('sqlite:///sqlalchemy_example.db')
+# Bind the engine to the metadata of the Base class so that the
+# declaratives can be accessed through a DBSession instance
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind=engine)
 
 @app.route('/')
 def index():
@@ -82,13 +99,14 @@ def repository(repo):
 
     for k,v in ancestry_map.iteritems():
         name = k
+        fullname=k
         # if image has tag, show tag instead of hash
         if name in inv_tag:
             name = inv_tag[name]
         else:
             # show only first 12 characters from hash
             name = name[0:12]
-        ancestry_list.append({'name': name, 'parent': v if not v else v[0:12]})
+        ancestry_list.append({'imageid': fullname, 'name': name, 'parent': v if not v else v[0:12]})
 
     return render_template('repository.html',
                            tags=tags,
@@ -107,13 +125,84 @@ def image(img):
     ancestry_list = []
 
     for i in range(len(a)-1,-1,-1):
-        if i == len(a)-1:
-            ancestry_list.append({'name': a[i][0:12], 'parent': None})
+        fullIndexId = a[i]
+        nodeInfo=registry.get_image_info(fullIndexId)
+
+        if 'author' in nodeInfo:
+            author=nodeInfo['author']
+            gtposition=author.find("<");
+            if gtposition>0:
+                author=author[:gtposition - 1];
         else:
-            ancestry_list.append({'name': a[i][0:12], 'parent': a[i+1][0:12]})
+            author=None
+
+        if 'created' in nodeInfo:
+            created=nodeInfo['created']
+        else:
+            created=0
+
+        if i == len(a)-1:
+            ancestry_list.append({'imageid': fullIndexId, 'name': fullIndexId[0:12], 'author':  author, 'created':  created, 'parent': None})
+        else:
+            ancestry_list.append({'imageid': fullIndexId, 'name': fullIndexId[0:12], 'author':  author, 'created':  created, 'parent': a[i+1][0:12]})
 
     return render_template('image.html', img_info=img_info, ancestry_list=ancestry_list)
 
+@app.route('/indexdrop/')
+def indexdrop():
+    image_descendants = ImageDescendants(registry)
+    image_descendants.deleteAll()
+    return None
+
+@app.route('/indexupdate/', methods=['GET', 'POST'])
+def indexupdate():
+  """
+  Finds new images in all repositories and saves them to DB.
+  :return:
+  """
+  if 'doupdate' in request.args:
+    image_descendants = ImageDescendants(registry)
+    indexupdateresult = image_descendants.updateDescendantIndex()
+  else:
+    indexupdateresult = None
+
+  return render_template('indexupdate.html', indexupdateresult=indexupdateresult)
+
+
+@app.route('/descendants/byid/<id>/', methods=('GET', 'POST'))
+def descendantsbyid(id):
+    form = DescendantsSearchByIdForm(csrf_enabled=False)
+
+
+    if form.validate_on_submit():
+        return redirect('/descendants/byid/' + str(form.rawid.data))
+
+    form.rawid.data=id
+
+    image_descendants = ImageDescendants(registry)
+    result = image_descendants.listDescendants(id)
+
+    return render_template('descendants.html', result=result, form=form)
+
+@app.route('/descendants/bylayer/<path:layername>', methods=('GET', 'POST'))
+def descendantsbylayer(layername):
+    form = DescendantsSearchByTagForm(csrf_enabled=False)
+
+    tags = registry.get_tags(layername)
+    tagvalue=form.tag.data
+
+    form.tag.choices = [(value, key) for key, value in tags.iteritems()]
+    form.layer = layername
+
+    submited = form.validate_on_submit()
+    result = None
+
+    if submited:
+        image_descendants = ImageDescendants(registry)
+        result = image_descendants.listDescendants(tagvalue)
+
+
+    return render_template('descendants.html', result=result, form=form, layername=layername, submited=submited)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4000, debug=True)
