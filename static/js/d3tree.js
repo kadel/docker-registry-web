@@ -37,7 +37,20 @@ var tree = d3.layout.tree()
 var diagonal = d3.svg.diagonal()
 	.projection(function(d) { return [d.x, d.y]; });
 
+  function zoomed() {
+    d3.event.sourceEvent.stopPropagation();
+    svg.attr("transform", "translate("
+        + (d3.event.translate[0] + margin.left) + ","
+        + (d3.event.translate[1] + margin.top) + ")scale(" + d3.event.scale + ")");
+  }
+
+  var zoomListener = d3.behavior.zoom()
+    .scaleExtent([0.3, 3])
+    .on("zoom", zoomed);
+
+
 var svg = d3.select("#graph").append("svg")
+    .call(zoomListener)
     .attr("class", "graph")
 	.attr("width", width + margin.right + margin.left)
 	.attr("height", height + margin.top + margin.bottom)
@@ -45,7 +58,7 @@ var svg = d3.select("#graph").append("svg")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 root = treeData[0];
-  
+
 update(root);
 
 function update(source) {
@@ -64,7 +77,7 @@ function update(source) {
   // Enter the nodes.
   var nodeEnter = node.enter().append("g")
 	  .attr("class", "node")
-	  .attr("transform", function(d) { 
+	  .attr("transform", function(d) {
 		  return "translate(" + d.x + "," + d.y + ")"; });
 
   var onclickFce = function(d) {return window.location=d.imageid};
@@ -72,9 +85,8 @@ function update(source) {
   nodeEnter.append("circle")
 	  .attr("r", 10)
 	  .style("fill", "#fff")
-	  .on("click", onclickFce);
-	  ;;
-
+	  //.on("click", onclickFce)
+	  ;;;
 
   nodeEnter.append("text")
 	  .attr("x", function(d) { 
@@ -87,9 +99,8 @@ function update(source) {
 		   if (d.author != null) label += " (" + d.author + ") ";
 		   return label; })  //+ d.created;
 	  .style("fill-opacity", 1)
-	  .on("click", onclickFce);
-	  ;
-
+	  //.on("click", onclickFce)
+	  ;;
 
   // Declare the links…
   var link = svg.selectAll("path.link")
