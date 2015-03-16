@@ -41,7 +41,11 @@
         {% if not submited %}
         Press button to find descendants.
         {% else %}
-        No results found. Do you want to <a href="/indexupdate">refresh index</a>?
+            {% if result.imageIndexed %}
+                No results found. Do you want to <a href="/indexupdate">refresh index</a>?
+            {% else %}
+                No results found. Index is outdated. Do you want to <a href="/indexupdate">refresh index</a>?
+            {% endif %}
         {% endif %}
     {% endif %}
 

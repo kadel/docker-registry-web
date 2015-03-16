@@ -1,7 +1,9 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import and_
 from libs.model import Image
+from libs.model import Tag
 
 from libs.model import Base
 from libs.registry import Registry
@@ -22,7 +24,6 @@ class ImageDescendants:
 
   def __init__(self, registry):
     self.registry = registry
-    self.dalsi_promenna = None
 
   def printDatabase(self):
     """ vylistovani vrstev """
@@ -49,6 +50,16 @@ class ImageDescendants:
       session.close();
 
       return longIds
+
+  def imageIsIndexed(self, rawId):
+      """
+      Returns true if image is found in index in database
+      """
+      DBSession = sessionmaker(bind=engine)
+      session = DBSession()
+      images = session.query(Image.id).filter(Image.id == rawId).first()
+      session.close();
+      return not images == None
 
   def findDescendants(self, rawId):
       """ Find all descending images for image with given id using database"""
@@ -105,8 +116,6 @@ class ImageDescendants:
   def listDescendants(self, myTagId):
     descendantGraph = []
 
-
-    print "myTagId:" + myTagId
     foundDescendants = self.findDescendants(myTagId)
 
     for descendant in foundDescendants:
@@ -114,6 +123,39 @@ class ImageDescendants:
 
     return {'descendants': foundDescendants, 'graph': descendantGraph}
 
+  def updateTagIndex(self):
+      """
+      Loads all known tags from repositories and save the unknown ones.
+      """
+      DBSession = sessionmaker(bind=engine)
+      session = DBSession()
+
+      old_image = 0
+      new_image = 0
+      lines = []
+
+      # List all tags in all layers:
+      for layerName in self.getLayerNames():
+        print "scanning layer " + str(layerName)
+        for tagName, imageId in self.registry.get_tags(layerName).iteritems():
+
+          queryFilter = and_(Tag.layer == layerName, Tag.tag == tagName)
+          result = session.query(Tag.id).filter(queryFilter).first();
+
+          # if tag is new or it has changed save to database:
+          if (result is None or len(result) == 0):
+            session2 = DBSession()
+            session2.add(Tag(id=imageId, layer=layerName, tag=tagName))
+            session2.commit();
+            session2.close();
+            new_image += 1
+            lines.append("Tag changed: " + layerName + " " + tagName);
+          else:
+            old_image += 1
+
+      session.close();
+      print "Tag index update finished: \"" + str(new_image) + "\" changed tags found."
+      return None
 
   def updateDescendantIndex(self):
       DBSession = sessionmaker(bind=engine)
