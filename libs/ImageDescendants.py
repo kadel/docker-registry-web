@@ -6,12 +6,6 @@ from libs.model import Image
 from libs.model import Tag
 
 from libs.model import Base
-from libs.registry import Registry
-
-from wtforms import Form
-from wtforms import StringField, BooleanField
-from wtforms.validators import DataRequired
-from flask import request
 
 engine = create_engine('sqlite:///sqlalchemy_example.db')
 # Bind the engine to the metadata of the Base class so that the
