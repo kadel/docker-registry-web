@@ -85,7 +85,7 @@ function update(source) {
   nodeEnter.append("circle")
 	  .attr("r", 10)
 	  .style("fill", "#fff")
-	  //.on("click", onclickFce)
+	  .on("click", onclickFce)
 	  ;;;
 
   nodeEnter.append("text")
@@ -95,11 +95,12 @@ function update(source) {
 	  .attr("text-anchor", function(d) { 
 		  return "middle" })//|| d._children ? "end" : "start"; })
 	  .text(function(d) {
-		   label= d.name 
+		   label = d.name
+		   if (d.maintagname != null) label = d.maintagname;
 		   if (d.author != null) label += " (" + d.author + ") ";
 		   return label; })  //+ d.created;
 	  .style("fill-opacity", 1)
-	  //.on("click", onclickFce)
+	  .on("click", onclickFce)
 	  ;;
 
   // Declare the links…

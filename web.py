@@ -5,7 +5,7 @@ simple, ugly and really really STUPID web interface for browsing docker-registry
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from libs.model import Base
-from libs.model import Image
+from libs.model import Tag
 
 from flask import Flask
 from flask import render_template
@@ -97,6 +97,9 @@ def repository(repo):
             else:
                 ancestry_map[a[i]] = a[i+1]
 
+    DBSession = sessionmaker(bind=engine)
+    session = DBSession()
+
     for k,v in ancestry_map.iteritems():
         name = k
         fullname=k
@@ -104,9 +107,16 @@ def repository(repo):
         if name in inv_tag:
             name = inv_tag[name]
         else:
+            tagFromDb = session.query(Tag).filter(Tag.id == fullname).first()
+            if not tagFromDb is None:
+              fullname = tagFromDb.layer + ":" + tagFromDb.tag
+
             # show only first 12 characters from hash
             name = name[0:12]
+
         ancestry_list.append({'imageid': fullname, 'name': name, 'parent': v if not v else v[0:12]})
+
+    session.close();
 
     return render_template('repository.html',
                            tags=tags,
@@ -122,7 +132,17 @@ def image(img):
     img_info = registry.get_image_info(img)
     a = registry.get_image_ancestry(img)
 
+    #find all tags for given image
+    DBSession = sessionmaker(bind=engine)
+    session = DBSession()
+    print "Debug: finding tags for \"" + str(img) + "\""
+    allImageTags = [(taginfo.layer, taginfo.tag) for taginfo in session.query(Tag).filter(Tag.id == img).all()]
+    session.close();
+
     ancestry_list = []
+
+    DBSession = sessionmaker(bind=engine)
+    session = DBSession()
 
     for i in range(len(a)-1,-1,-1):
         fullIndexId = a[i]
@@ -141,12 +161,22 @@ def image(img):
         else:
             created=0
 
-        if i == len(a)-1:
-            ancestry_list.append({'imageid': fullIndexId, 'name': fullIndexId[0:12], 'author':  author, 'created':  created, 'parent': None})
-        else:
-            ancestry_list.append({'imageid': fullIndexId, 'name': fullIndexId[0:12], 'author':  author, 'created':  created, 'parent': a[i+1][0:12]})
+        #this is slow
+        allImageTags = [(taginfo.layer, taginfo.tag) for taginfo in session.query(Tag).filter(Tag.id == fullIndexId).all()]
 
-    return render_template('image.html', img_info=img_info, ancestry_list=ancestry_list)
+        if not len(allImageTags) == 0:
+            pair = allImageTags[0] #TODO choose the best tag.
+            tagName = pair[0] + ":" + pair[1]
+        else:
+            tagName = None
+
+        if i == len(a)-1:
+            ancestry_list.append({'maintagname': tagName, 'imageid': fullIndexId, 'name': fullIndexId[0:12], 'author':  author, 'created':  created, 'parent': None})
+        else:
+            ancestry_list.append({'maintagname': tagName, 'imageid': fullIndexId, 'name': fullIndexId[0:12], 'author':  author, 'created':  created, 'parent': a[i+1][0:12]})
+
+    session.close();
+    return render_template('image.html', img_info=img_info, ancestry_list=ancestry_list, allImageTags=allImageTags)
 
 @app.route('/indexdrop/')
 def indexdrop():
@@ -155,14 +185,17 @@ def indexdrop():
     return None
 
 @app.route('/indexupdate/', methods=['GET', 'POST'])
-def indexupdate():
+def imageindexupdate():
   """
   Finds new images in all repositories and saves them to DB.
   :return:
   """
-  if 'doupdate' in request.args:
+  if 'doimageupdate' in request.args:
     image_descendants = ImageDescendants(registry)
     indexupdateresult = image_descendants.updateDescendantIndex()
+  elif 'dotagupdate' in request.args:
+    image_descendants = ImageDescendants(registry)
+    indexupdateresult = image_descendants.updateTagIndex()
   else:
     indexupdateresult = None
 
@@ -173,21 +206,25 @@ def indexupdate():
 def descendantsbyid(id):
     form = DescendantsSearchByIdForm(csrf_enabled=False)
 
-
     if form.validate_on_submit():
         return redirect('/descendants/byid/' + str(form.rawid.data))
 
     form.rawid.data=id
 
     image_descendants = ImageDescendants(registry)
-    result = image_descendants.listDescendants(id)
+    result = image_descendants.listDescendants(id.strip())
 
-    return render_template('descendants.html', result=result, form=form)
+    imageIndexed=True;
+    if len(result) == 0:
+        imageIndexed=image_descendants.imageIsIndexed(id.strip())
+
+    return render_template('descendants.html', result=result, form=form, imageIndexed=imageIndexed)
 
 @app.route('/descendants/bylayer/<path:layername>', methods=('GET', 'POST'))
 def descendantsbylayer(layername):
     form = DescendantsSearchByTagForm(csrf_enabled=False)
 
+    layername = layername.strip()
     tags = registry.get_tags(layername)
     tagvalue=form.tag.data
 

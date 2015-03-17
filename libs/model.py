@@ -1,9 +1,18 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
- 
+
 Base = declarative_base()
- 
+
+class Tag(Base):
+    __tablename__ = 'tag'
+    id = Column(String(64), primary_key=True)
+    layer = Column(String(120), primary_key=True)
+    tag = Column(String(120),  primary_key=True)
+
+    def __repr__(self):
+        return '<Tag layer=%r tag=%r id=%r>' % (self.layer, self.tag, self.id)
+
 class Image(Base):
     __tablename__ = 'image'
     id = Column(String(64), primary_key=True)

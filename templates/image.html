@@ -3,6 +3,20 @@
 {% block content %}
   <h3>{{ img_info.id }}</h3>
 
+
+    <div class="row">
+      <div class="col-md-12">
+        {% if allImageTags %}
+            All image tags:
+            {% for layer,tag in allImageTags %}
+              <span>{{ layer }}:{{ tag }}</span>
+            {% endfor %}
+        {% else %}
+        <b>This image is not tagged</b>
+        {% endif %}
+      </div>
+    </div>
+
     <div class="row">
         <div class="col-md-6">
             Find descendants:
