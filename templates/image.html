@@ -9,7 +9,7 @@
         {% if allImageTags %}
             All image tags:
             {% for layer,tag in allImageTags %}
-              <span>{{ layer }}:{{ tag }}</span>
+              <span class="label label-primary">{{ layer }}:{{ tag }}</span>
             {% endfor %}
         {% else %}
         <b>This image is not tagged</b>
