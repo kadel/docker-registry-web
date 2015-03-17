@@ -118,38 +118,75 @@ class ImageDescendants:
     return {'descendants': foundDescendants, 'graph': descendantGraph}
 
   def updateTagIndex(self):
-      """
-      Loads all known tags from repositories and save the unknown ones.
-      """
-      DBSession = sessionmaker(bind=engine)
-      session = DBSession()
+    """
+    Loads all known tags from repositories and save the unknown ones.
+    """
+    DBSession = sessionmaker(bind=engine)
+    session = DBSession()
 
-      old_image = 0
-      new_image = 0
-      lines = []
+    global_old_tag_cnt = 0
+    global_new_tag_cnt = 0
+    global_changed_tag_cnt = 0
+    global_errors_cnt = 0
+    lines = []
 
-      # List all tags in all layers:
-      for layerName in self.getLayerNames():
-        print "scanning layer " + str(layerName)
-        for tagName, imageId in self.registry.get_tags(layerName).iteritems():
+    # List all tags in all layers:
+    for layerName in self.getLayerNames():
+      print "scanning layer " + str(layerName)
+      local_old_tag_cnt = 0
+      local_new_tag_cnt = 0
+      local_changed_tag_cnt = 0;
+      local_errors_cnt = 0
 
-          queryFilter = and_(Tag.layer == layerName, Tag.tag == tagName)
-          result = session.query(Tag.id).filter(queryFilter).first();
+      try:
+        tags = self.registry.get_tags(layerName)
 
-          # if tag is new or it has changed save to database:
-          if (result is None or len(result) == 0):
+        for tagName, imageId in tags.iteritems():
+
+          query_filter = and_(Tag.layer == layerName, Tag.tag == tagName)
+          ids_in_database = [x[0] for x in session.query(Tag.id).filter(query_filter).all()];
+
+          tag_is_new = ids_in_database is None or len(ids_in_database) == 0
+          tag_changed = False;
+          if not tag_is_new:
+              tag_changed = not (imageId in ids_in_database)
+
+          if tag_is_new or tag_changed:
             session2 = DBSession()
             session2.add(Tag(id=imageId, layer=layerName, tag=tagName))
             session2.commit();
             session2.close();
-            new_image += 1
-            lines.append("Tag changed: " + layerName + " " + tagName);
-          else:
-            old_image += 1
 
-      session.close();
-      print "Tag index update finished: \"" + str(new_image) + "\" changed tags found."
-      return None
+            if tag_is_new:
+              lines.append("New tag: " + layerName + " " + tagName);
+              global_new_tag_cnt += 1
+              local_new_tag_cnt  += 1
+
+            if tag_changed:
+              lines.append("Tag target changed: " + layerName + " " + tagName + " to " + str(imageId));
+              global_changed_tag_cnt += 1
+              local_changed_tag_cnt  += 1
+
+          else:
+            global_old_tag_cnt += 1
+            local_old_tag_cnt += 1
+
+      except Exception as e:
+        global_errors_cnt += 1
+        local_errors_cnt += 1
+        lines.append("Cannot process layer " + str(layerName) + ": "+ str(e));
+        raise e
+
+      lines.append("Layer " + str(layerName) + " scanned - found " + str(local_changed_tag_cnt) +
+                   " changed and " + str(local_new_tag_cnt) + " new tags with " +
+                   str(local_errors_cnt) + " errors" );
+
+    session.close();
+    msg = "Tag index update finished: \"" + str(global_new_tag_cnt) + "\" changed tags found."
+    lines.append(msg);
+    print msg
+    return {'newImages': global_new_tag_cnt, 'oldImages': global_old_tag_cnt, 'results': lines, 'errors': global_errors_cnt}
+
 
   def updateDescendantIndex(self):
       DBSession = sessionmaker(bind=engine)
